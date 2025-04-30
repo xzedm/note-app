@@ -1,7 +1,8 @@
 import {useRef, useEffect, useState} from 'react'
 import Trash from '../icons/Trash';
+import { setNewOffset, autoGrow, setZIndex } from '../utils.js';
 
-const NodeCars = ({note}) => {
+const NoteCard = ({note}) => {
     const body = JSON.parse(note.body);
     const [position, setPosition] = useState(JSON.parse(note.position));
     const colors = JSON.parse(note.colors);
@@ -16,14 +17,8 @@ const NodeCars = ({note}) => {
         autoGrow(textAreaRef);
     }, []);
 
-    const autoGrow = (textAreaRef) => {
-        const {current} = textAreaRef;
-
-      current.style.height = "auto"; // Reset the height
-      current.style.height = current.scrollHeight + "px"; // Set the new height
-  }
-
     const mouseDown = (e) => {
+      setZIndex(cardRef.current);
       mouseStartPos.x = e.clientX;
       mouseStartPos.y = e.clientY;
 
@@ -37,16 +32,17 @@ const NodeCars = ({note}) => {
         y: mouseStartPos.y - e.clientY,
       };
 
-      console.log("mouseMovedir", mouseMoveDir);
-
       mouseStartPos.x = e.clientX;
       mouseStartPos.y = e.clientY;
 
-      setPosition({
-        x:cardRef.current.offsetLeft - mouseMoveDir.x,
-        y:cardRef.current.offsetTop - mouseMoveDir.y,
-      });
-    }
+      const newPosition = setNewOffset(cardRef.current, mouseMoveDir);
+      setPosition(newPosition);
+
+      // setPosition({
+      //   x:cardRef.current.offsetLeft - mouseMoveDir.x,
+      //   y:cardRef.current.offsetTop - mouseMoveDir.y,
+      // });
+    };
 
     const mouseUp = (e) => {
       document.removeEventListener('mousemove', mouseMove);
@@ -76,6 +72,7 @@ const NodeCars = ({note}) => {
           ref={textAreaRef}
           style={{color: colors.colorText }} defaultValue = {body}
           onInput={() => {autoGrow(textAreaRef)}}
+          onFocus={() => setZIndex(cardRef.current)}
           >
           </textarea>
         </div>
@@ -83,4 +80,4 @@ const NodeCars = ({note}) => {
   )
 }
 
-export default NodeCars
+export default NoteCard
