@@ -24,3 +24,11 @@ export const setZIndex = (selectedCard) => {
         }
     });
 };
+
+export const bodyParser = (value) => {
+    try{
+        return JSON.parse(value);
+    }catch(error){
+        return value;
+    }
+};
