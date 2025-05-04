@@ -1,12 +1,15 @@
-import {useRef, useEffect, useState} from 'react';
+import {useRef, useEffect, useState, useContext} from 'react';
 import DeleteButton from './DeleteButton';
 import { db } from '../appwrite/databases.js';
 import Spinner from '../icons/Spinner.jsx';
 import { setNewOffset, autoGrow, setZIndex, bodyParser } from '../utils.js';
+import { NoteContext } from '../context/NoteContext.jsx';
 
-const NoteCard = ({note, setNotes}) => {
+const NoteCard = ({ note }) => {
     const [saving, setSaving] = useState(false);
     const keyUpTimer = useRef(null);
+
+    const { setSelectedNote } = useContext(NoteContext);
 
     const body = bodyParser(note.body);
     const [position, setPosition] = useState(JSON.parse(note.position));
@@ -20,16 +23,20 @@ const NoteCard = ({note, setNotes}) => {
 
     useEffect(() => {
         autoGrow(textAreaRef);
+        setZIndex(cardRef.current);
     }, []);
 
     const mouseDown = (e) => {
       if(e.target.className === "card-header"){
-      setZIndex(cardRef.current);
       mouseStartPos.x = e.clientX;
       mouseStartPos.y = e.clientY;
 
       document.addEventListener('mousemove', mouseMove);
       document.addEventListener('mouseup', mouseUp);
+
+      setZIndex(cardRef.current);
+      setSelectedNote(note);
+
       }
     };
 
@@ -93,7 +100,7 @@ const NoteCard = ({note, setNotes}) => {
       onMouseDown={ mouseDown }
       className='card-header' 
       style={{backgroundColor: colors.colorHeader}}>
-      <DeleteButton setNotes={setNotes} noteId={note.$id} />
+      <DeleteButton noteId={note.$id} />
       {saving && (
         <div className="card-saving">
           <Spinner color={colors.colorText} />
@@ -108,7 +115,7 @@ const NoteCard = ({note, setNotes}) => {
           ref={textAreaRef}
           style={{color: colors.colorText }} defaultValue = {body}
           onInput={() => {autoGrow(textAreaRef)}}
-          onFocus={() => setZIndex(cardRef.current)}
+          onFocus={() => {setZIndex(cardRef.current); setSelectedNote(note);}}
           >
           </textarea>
         </div>
